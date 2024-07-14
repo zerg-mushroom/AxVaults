@@ -1,16 +1,17 @@
 package com.artillexstudios.axvaults.vaults;
 
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 public class VaultManager {
+
     private static final HashMap<UUID, VaultPlayer> players = new HashMap<>();
     private static final Set<Vault> vaults = Collections.newSetFromMap(new WeakHashMap<>()); // todo: currently this WeakHashMap does nothing
 
@@ -20,7 +21,9 @@ public class VaultManager {
     }
 
     public static VaultPlayer getPlayer(@NotNull UUID uuid) {
-        if (players.containsKey(uuid)) return players.get(uuid);
+        if (players.containsKey(uuid)) {
+            return players.get(uuid);
+        }
         final VaultPlayer vaultPlayer = new VaultPlayer(uuid);
         players.put(uuid, vaultPlayer);
         vaultPlayer.loadSync();
@@ -29,7 +32,9 @@ public class VaultManager {
 
     public static void removePlayer(@NotNull Player player) {
         final VaultPlayer vaultPlayer = players.remove(player.getUniqueId());
-        if (vaultPlayer == null) return;
+        if (vaultPlayer == null) {
+            return;
+        }
         vaultPlayer.save();
     }
 
@@ -52,8 +57,17 @@ public class VaultManager {
     }
 
     public static int getVaultsOfPlayer(@NotNull Player player) {
-        if (!players.containsKey(player.getUniqueId())) return 0;
+        if (!players.containsKey(player.getUniqueId())) {
+            return 0;
+        }
         return players.get(player.getUniqueId()).getVaultMap().values().size();
+    }
+
+    public static int getVaultsOfPlayer(@NotNull UUID uuid) {
+        if (!players.containsKey(uuid)) {
+            return 0;
+        }
+        return players.get(uuid).getVaultMap().values().size();
     }
 
     public static void reload() {
