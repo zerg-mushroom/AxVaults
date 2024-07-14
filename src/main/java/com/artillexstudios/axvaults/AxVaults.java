@@ -1,5 +1,17 @@
 package com.artillexstudios.axvaults;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
+import org.bstats.bukkit.Metrics;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Warning;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
+
 import com.artillexstudios.axapi.AxPlugin;
 import com.artillexstudios.axapi.config.Config;
 import com.artillexstudios.axapi.data.ThreadedQueue;
@@ -30,22 +42,12 @@ import com.artillexstudios.axvaults.utils.UpdateNotifier;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import com.artillexstudios.axvaults.vaults.VaultPlayer;
+
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
-import org.bstats.bukkit.Metrics;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Warning;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import revxrsal.commands.bukkit.BukkitCommandActor;
 import revxrsal.commands.bukkit.BukkitCommandHandler;
 import revxrsal.commands.bukkit.exception.InvalidPlayerException;
 import revxrsal.commands.orphan.Orphans;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.stream.Collectors;
 
 public final class AxVaults extends AxPlugin {
 
@@ -70,6 +72,7 @@ public final class AxVaults extends AxPlugin {
         return database;
     }
 
+    @Override
     public void load() {
         BukkitLibraryManager libraryManager = new BukkitLibraryManager(this, "lib");
         libraryManager.addMavenCentral();
@@ -79,16 +82,17 @@ public final class AxVaults extends AxPlugin {
         }
     }
 
+    @Override
     public void enable() {
         instance = this;
+
+        CONFIG = new Config(new File(getDataFolder(), "config.yml"), getResource("config.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("version")).build());
+        MESSAGES = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("version")).build());
 
         if (CONFIG.getBoolean("bstats", true)) {
             int pluginId = 20541;
             new Metrics(this, pluginId);
         }
-
-        CONFIG = new Config(new File(getDataFolder(), "config.yml"), getResource("config.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("version")).build());
-        MESSAGES = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("version")).build());
 
         MESSAGEUTILS = new MessageUtils(MESSAGES.getBackingDocument(), "prefix", CONFIG.getBackingDocument());
         BUKKITAUDIENCES = BukkitAudiences.create(this);
@@ -96,11 +100,10 @@ public final class AxVaults extends AxPlugin {
         threadedQueue = new ThreadedQueue<>("AxVaults-Datastore-thread");
 
         switch (CONFIG.getString("database.type").toLowerCase()) {
-            case "sqlite": {
+            case "sqlite" -> {
                 database = new SQLite();
-                break;
             }
-            default: {
+            default -> {
                 database = new H2();
             }
         }
@@ -172,6 +175,7 @@ public final class AxVaults extends AxPlugin {
         COMMANDHANDLER.registerBrigadier();
     }
 
+    @Override
     public void disable() {
         for (VaultPlayer vaultPlayer : VaultManager.getPlayers().values()) {
             for (Vault vault : vaultPlayer.getVaultMap().values()) {
@@ -182,8 +186,4 @@ public final class AxVaults extends AxPlugin {
         database.disable();
     }
 
-//    public void updateFlags() {
-//        FeatureFlags.PACKET_ENTITY_TRACKER_ENABLED.set(true);
-//        FeatureFlags.HOLOGRAM_UPDATE_TICKS.set(10L);
-//    }
 }
