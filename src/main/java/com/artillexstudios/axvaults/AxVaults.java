@@ -48,6 +48,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 public final class AxVaults extends AxPlugin {
+
     public static Config CONFIG;
     public static Config MESSAGES;
     public static MessageUtils MESSAGEUTILS;
@@ -81,8 +82,10 @@ public final class AxVaults extends AxPlugin {
     public void enable() {
         instance = this;
 
-        int pluginId = 20541;
-        new Metrics(this, pluginId);
+        if (CONFIG.getBoolean("bstats", true)) {
+            int pluginId = 20541;
+            new Metrics(this, pluginId);
+        }
 
         CONFIG = new Config(new File(getDataFolder(), "config.yml"), getResource("config.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("version")).build());
         MESSAGES = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("version")).build());
@@ -117,7 +120,9 @@ public final class AxVaults extends AxPlugin {
 
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55ff00[AxVaults] Loaded plugin!"));
 
-        if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier(this, 5417);
+        if (CONFIG.getBoolean("update-notifier.enabled", true)) {
+            new UpdateNotifier(this, 5417);
+        }
     }
 
     public static void registerCommands() {
@@ -130,7 +135,9 @@ public final class AxVaults extends AxPlugin {
 
             COMMANDHANDLER.getAutoCompleter().registerSuggestion("vaults", (args, sender, command) -> {
                 final Player player = Bukkit.getPlayer(sender.getUniqueId());
-                if (!player.hasPermission("axvaults.openremote")) return new ArrayList<>();
+                if (!player.hasPermission("axvaults.openremote")) {
+                    return new ArrayList<>();
+                }
 
                 final ArrayList<String> numbers = new ArrayList<>();
                 for (int i = 0; i < VaultManager.getVaultsOfPlayer(player); i++) {
@@ -141,9 +148,13 @@ public final class AxVaults extends AxPlugin {
 
             COMMANDHANDLER.registerValueResolver(0, OfflinePlayer.class, context -> {
                 String value = context.pop();
-                if (value.equalsIgnoreCase("self") || value.equalsIgnoreCase("me")) return ((BukkitCommandActor) context.actor()).requirePlayer();
+                if (value.equalsIgnoreCase("self") || value.equalsIgnoreCase("me")) {
+                    return ((BukkitCommandActor) context.actor()).requirePlayer();
+                }
                 OfflinePlayer player = NMSHandlers.getNmsHandler().getCachedOfflinePlayer(value);
-                if (player == null && !(player = Bukkit.getOfflinePlayer(value)).hasPlayedBefore()) throw new InvalidPlayerException(context.parameter(), value);
+                if (player == null && !(player = Bukkit.getOfflinePlayer(value)).hasPlayedBefore()) {
+                    throw new InvalidPlayerException(context.parameter(), value);
+                }
                 return player;
             });
 

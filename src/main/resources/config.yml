@@ -70,9 +70,14 @@ admin-command-aliases:
 # should be plugin notify you if there is a new update?
 update-notifier:
   # if enabled, it will display the message in the console
-  enabled: true
+  enabled: false
   # if enabled, it will broadcast the update message to all players who have the <plugin-name>.update-notify permission
   on-join: true
+
+# should the plugin send data to bStats?
+bstats:
+  # if enabled, the plugin will send data to bStats
+  enabled: false
 
 # do not change this
 version: 4
