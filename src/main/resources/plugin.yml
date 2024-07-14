@@ -18,3 +18,5 @@ permissions:
     default: true
   axvaults.itempicker:
     default: true
+  axvaults.update-notify:
+    default: op
